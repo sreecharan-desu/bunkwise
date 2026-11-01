@@ -3,6 +3,7 @@ import {
   classesNeeded, isValidCounts, overall, percentage, projectPercentage,
   safeSkips, semesterPlan, status, summary, type Subject,
 } from './attendance';
+import { planText } from './share';
 import { isValidTarget, load, newId, parseState, save, type AppState } from './storage';
 
 const fmt = (p: number | null) => (p === null ? '--' : `${p.toFixed(1)}%`);
@@ -19,6 +20,7 @@ export default function App() {
   const fileRef = useRef<HTMLInputElement>(null);
   const { target, subjects } = state;
   const [targetText, setTargetText] = useState(String(target));
+  const [copied, setCopied] = useState('');
 
   useEffect(() => save(state), [state]);
 
@@ -34,6 +36,17 @@ export default function App() {
     a.download = 'bunkwise.json';
     a.click();
     URL.revokeObjectURL(a.href);
+  }
+
+  async function sharePlan() {
+    const text = planText(subjects, target);
+    try {
+      if (navigator.share) { await navigator.share({ text }); return; }
+      await navigator.clipboard.writeText(text);
+      setCopied('Plan copied. Paste it anywhere.');
+    } catch (e) {
+      if ((e as Error).name !== 'AbortError') setCopied('Could not copy. Your browser blocked it.');
+    }
   }
 
   async function importJson(file: File) {
@@ -96,13 +109,18 @@ export default function App() {
 
       <footer>
         <div className="row">
+          <button onClick={sharePlan} disabled={!subjects.length}>Share plan</button>
           <button onClick={exportJson} disabled={!subjects.length}>Export backup</button>
           <button onClick={() => fileRef.current?.click()}>Import backup</button>
           <input ref={fileRef} type="file" accept="application/json" hidden
             onChange={(e) => { const f = e.target.files?.[0]; if (f) importJson(f); e.target.value = ''; }} />
         </div>
+        {copied && <p role="status">{copied}</p>}
         {error && <p role="alert" className="error">{error}</p>}
         <p className="note">Your data stays in this browser. Nothing is sent to a server.</p>
+        <p className="note">
+          Found a bug or have an idea? <a href="https://github.com/sreecharan-desu/bunkwise/issues/new" target="_blank" rel="noopener noreferrer">Open an issue</a>.
+        </p>
       </footer>
     </main>
   );
