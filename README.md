@@ -1,5 +1,7 @@
 # bunkwise
 
+Live: https://bunkwise-sreecharan-desus-projects.vercel.app
+
 A small web app for college students who have to keep attendance above a fixed percentage (75% at most Indian colleges, including mine). Add your subjects with how many classes you attended and how many were held, and it tells you, per subject:
 
 - your current percentage
@@ -8,6 +10,8 @@ A small web app for college students who have to keep attendance above a fixed p
 - a "what if" view: attend X and skip Y of the next classes, where do you land
 
 It also shows an overall percentage across subjects, since some colleges use that instead.
+
+![bunkwise with four subjects and the what-if planner open](docs/screenshot.png)
 
 ## Why
 
