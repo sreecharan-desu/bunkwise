@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import {
   classesNeeded, isValidCounts, overall, percentage, projectPercentage,
-  safeSkips, status, summary, type Subject,
+  safeSkips, semesterPlan, status, summary, type Subject,
 } from './attendance';
 import { isValidTarget, load, newId, parseState, save, type AppState } from './storage';
 
@@ -18,6 +18,7 @@ export default function App() {
   const [error, setError] = useState('');
   const fileRef = useRef<HTMLInputElement>(null);
   const { target, subjects } = state;
+  const [targetText, setTargetText] = useState(String(target));
 
   useEffect(() => save(state), [state]);
 
@@ -37,7 +38,9 @@ export default function App() {
 
   async function importJson(file: File) {
     try {
-      setState(parseState(await file.text()));
+      const next = parseState(await file.text());
+      setState(next);
+      setTargetText(String(next.target));
       setError('');
     } catch (e) {
       setError(`Import failed: ${(e as Error).message}`);
@@ -57,12 +60,16 @@ export default function App() {
         <label>
           Target attendance (%)
           <input
-            type="number" min={1} max={100} value={target}
+            type="number" min={1} max={100} inputMode="numeric" value={targetText}
+            aria-describedby="target-hint"
             onChange={(e) => {
+              setTargetText(e.target.value);
               const t = Number(e.target.value);
-              if (isValidTarget(t)) setState((s) => ({ ...s, target: t }));
+              if (e.target.value !== '' && isValidTarget(t)) setState((s) => ({ ...s, target: t }));
             }}
+            onBlur={() => setTargetText(String(target))}
           />
+          <small id="target-hint">Whole number, 1 to 100</small>
         </label>
         <div className="overall" aria-live="polite">
           <span>Overall</span>
@@ -133,6 +140,9 @@ function SubjectCard({ subject, target, onChange, onRemove }: {
   const { name, attended, total } = subject;
   const [attend, setAttend] = useState(0);
   const [skip, setSkip] = useState(0);
+  const [left, setLeft] = useState('');
+  const remaining = Math.max(0, Math.floor(Number(left) || 0));
+  const plan = left === '' ? null : semesterPlan(attended, total, remaining, target);
   const st = status(attended, total, target);
   const pct = percentage(attended, total);
   const proj = projectPercentage(attended, total, attend, skip);
@@ -169,6 +179,19 @@ function SubjectCard({ subject, target, onChange, onRemove }: {
           <label>Attend next<input type="number" min={0} value={attend} onChange={(e) => setAttend(Math.max(0, Math.floor(Number(e.target.value) || 0)))} /></label>
           <label>Skip next<input type="number" min={0} value={skip} onChange={(e) => setSkip(Math.max(0, Math.floor(Number(e.target.value) || 0)))} /></label>
           <p aria-live="polite">You would be at <b>{fmt(proj)}</b>{proj !== null && (proj >= target ? ', above target.' : ', below target.')}</p>
+        </div>
+      </details>
+      <details>
+        <summary>End of semester</summary>
+        <div className="row whatif">
+          <label>Classes left this semester<input type="number" min={0} inputMode="numeric" value={left} onChange={(e) => setLeft(e.target.value)} /></label>
+          {plan && (
+            <p aria-live="polite">
+              {plan.reachable
+                ? <>Attend at least <b>{plan.mustAttend}</b> of {remaining}. You can skip <b>{plan.maxSkips}</b> and finish at or above {target}%.</>
+                : <>Even attending all {remaining} ends at <b>{fmt(plan.bestFinal)}</b>, below {target}%. Talk to your department about condonation.</>}
+            </p>
+          )}
         </div>
       </details>
       <button className="link danger" onClick={() => confirm(`Remove ${name}?`) && onRemove()}>Remove subject</button>
