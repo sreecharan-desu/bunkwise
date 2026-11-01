@@ -20,9 +20,9 @@ button.link { border: 0; background: none; padding: 4px 0; text-decoration: unde
 .overall { display: flex; flex-direction: column; align-items: end; }
 .overall strong { font-size: 1.6rem; }
 .overall span, .overall small { color: #4a5260; font-size: .85rem; }
-.add { display: grid; grid-template-columns: 2fr 1fr 1fr auto; gap: 10px; align-items: end; }
+.add { display: grid; grid-template-columns: minmax(0,2fr) minmax(0,1fr) minmax(0,1fr) auto; gap: 10px; align-items: end; }
 .add .full { grid-column: 1 / -1; }
-@media (max-width: 560px) { .add { grid-template-columns: 1fr 1fr; } .add .grow { grid-column: 1 / -1; } }
+@media (max-width: 560px) { .add { grid-template-columns: minmax(0,1fr) minmax(0,1fr); } .add .grow { grid-column: 1 / -1; } }
 .subjects { list-style: none; padding: 0; margin: 0; }
 .subject { border-left: 6px solid #8a93a0; }
 .subject.safe { border-left-color: #1a7f37; }
@@ -40,8 +40,9 @@ button.link { border: 0; background: none; padding: 4px 0; text-decoration: unde
 .row { display: flex; gap: 8px; flex-wrap: wrap; align-items: end; }
 details { margin: 12px 0 4px; }
 summary { cursor: pointer; font-weight: 600; }
-.whatif { margin-top: 8px; } .whatif input { width: 90px; } .whatif p { margin: 0 0 8px; }
+.whatif { margin-top: 8px; } .whatif input { width: 90px; } .whatif label { max-width: 170px; } .whatif p { margin: 0 0 8px; }
 .empty { text-align: center; }
 footer { margin-top: 24px; }
 .note { color: #4a5260; font-size: .85rem; }
 .error { color: #b42318; margin: 6px 0 0; }
+.add input { width: 100%; }
