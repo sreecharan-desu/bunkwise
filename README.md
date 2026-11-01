@@ -24,7 +24,7 @@ With `a` attended, `t` held and a target of `P` percent:
 - safe skips = `floor((100a - P t) / P)`, never below 0
 - classes needed = `ceil((P t - 100a) / (100 - P))` when you are short
 
-Targets are whole numbers so all of this runs in integers. The tests in `src/attendance.test.ts` check both formulas against brute force for every combination up to 60 classes.
+Targets are whole numbers so all of this runs in integers. The tests in `src/attendance.test.ts` check both formulas against brute force for every attended and held count up to 50 classes.
 
 ## Run it locally
 
