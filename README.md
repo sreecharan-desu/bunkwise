@@ -1,32 +1,50 @@
-# React + TypeScript + Vite
+# bunkwise
 
-This template provides a minimal setup to get React working in Vite with HMR and some Oxlint rules.
+A small web app for college students who have to keep attendance above a fixed percentage (75% at most Indian colleges, including mine). Add your subjects with how many classes you attended and how many were held, and it tells you, per subject:
 
-Currently, two official plugins are available:
+- your current percentage
+- how many upcoming classes you can miss and still stay at or above the target
+- if you are already short, how many classes in a row you need to attend to get back
+- a "what if" view: attend X and skip Y of the next classes, where do you land
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+It also shows an overall percentage across subjects, since some colleges use that instead.
 
-## React Compiler
+## Why
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+Every semester I see friends do this math in their heads and get it wrong, then find out in the last week that they are short in one subject. The rule is simple but the "how many can I miss" question is not obvious, because each class you skip also raises the total.
 
-## Expanding the Oxlint configuration
+## Privacy
 
-If you are developing a production application, we recommend enabling type-aware lint rules by installing `oxlint-tsgolint` and editing `.oxlintrc.json`:
+There is no backend and no login. Everything is stored in your browser's localStorage. You can export a JSON backup and import it on another device.
 
-```json
-{
-  "$schema": "./node_modules/oxlint/configuration_schema.json",
-  "plugins": ["react", "typescript", "oxc"],
-  "options": {
-    "typeAware": true
-  },
-  "rules": {
-    "react/rules-of-hooks": "error",
-    "react/only-export-components": ["warn", { "allowConstantExport": true }]
-  }
-}
+## The math
+
+With `a` attended, `t` held and a target of `P` percent:
+
+- safe skips = `floor((100a - P t) / P)`, never below 0
+- classes needed = `ceil((P t - 100a) / (100 - P))` when you are short
+
+Targets are whole numbers so all of this runs in integers. The tests in `src/attendance.test.ts` check both formulas against brute force for every combination up to 60 classes.
+
+## Run it locally
+
+```
+npm install
+npm run dev      # http://localhost:5173
+npm test         # vitest
+npm run build    # static build in dist/
 ```
 
-See the [Oxlint rules documentation](https://oxc.rs/docs/guide/usage/linter/rules) for the full list of rules and categories.
+## Stack
+
+React, TypeScript, Vite, Vitest. Deployed as a static site on Vercel.
+
+## Limitations
+
+- Counts are entered by hand. There is no timetable import or college portal sync.
+- Data lives in one browser unless you export and import it.
+- It does not know about medical leave or condonation rules, which differ by college.
+
+## License
+
+MIT
