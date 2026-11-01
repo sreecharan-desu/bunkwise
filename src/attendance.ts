@@ -80,3 +80,24 @@ export function summary(attended: number, total: number, target: number): string
   const k = safeSkips(attended, total, target);
   return `You can miss ${k} ${k === 1 ? 'class' : 'classes'} and stay at or above ${target}%.`;
 }
+
+export interface SemesterPlan {
+  /** Most of the remaining classes you can skip and still finish at or above target. */
+  maxSkips: number;
+  /** Fewest of the remaining classes you must attend. */
+  mustAttend: number;
+  /** False when even attending every remaining class leaves you short. */
+  reachable: boolean;
+  /** Final percentage if you attend every remaining class. */
+  bestFinal: number | null;
+}
+
+/** Plan to the end of the semester when `remaining` more classes will be held. */
+export function semesterPlan(attended: number, total: number, remaining: number, target: number): SemesterPlan {
+  const finalTotal = total + remaining;
+  const bestFinal = percentage(attended + remaining, finalTotal);
+  const s = Math.floor((100 * (attended + remaining) - target * finalTotal) / 100);
+  if (s < 0) return { maxSkips: 0, mustAttend: remaining, reachable: false, bestFinal };
+  const maxSkips = Math.min(s, remaining);
+  return { maxSkips, mustAttend: remaining - maxSkips, reachable: true, bestFinal };
+}

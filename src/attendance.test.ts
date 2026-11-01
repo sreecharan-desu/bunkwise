@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import {
   classesNeeded, isValidCounts, overall, percentage, projectPercentage,
-  safeSkips, status, summary,
+  safeSkips, semesterPlan, status, summary,
 } from './attendance';
 
 describe('percentage', () => {
@@ -73,4 +73,23 @@ describe('helpers', () => {
       { id: 'a', name: 'A', attended: 3, total: 4 },
       { id: 'b', name: 'B', attended: 5, total: 6 },
     ])).toEqual({ attended: 8, total: 10 }));
+});
+
+describe('semesterPlan', () => {
+  it('matches brute force over the remaining classes', () => {
+    for (const target of [60, 75, 85, 100]) {
+      for (let t = 0; t <= 30; t++) for (let a = 0; a <= t; a++) for (let r = 0; r <= 20; r++) {
+        let best = -1;
+        for (let s = 0; s <= r; s++) if (100 * (a + r - s) >= target * (t + r)) best = s;
+        const p = semesterPlan(a, t, r, target);
+        expect(p.reachable).toBe(best >= 0);
+        if (best >= 0) { expect(p.maxSkips).toBe(best); expect(p.mustAttend).toBe(r - best); }
+      }
+    }
+  });
+  it('handles a real case', () => {
+    // 26/38 with 22 left at 75%: must attend 19 of 22
+    expect(semesterPlan(26, 38, 22, 75)).toMatchObject({ maxSkips: 3, mustAttend: 19, reachable: true });
+    expect(semesterPlan(10, 40, 5, 75).reachable).toBe(false);
+  });
 });
