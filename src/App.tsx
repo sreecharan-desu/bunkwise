@@ -184,7 +184,7 @@ function SubjectCard({ subject, target, onChange, onRemove }: {
       <details>
         <summary>End of semester</summary>
         <div className="row whatif">
-          <label>Classes left this semester<input type="number" min={0} inputMode="numeric" value={left} onChange={(e) => setLeft(e.target.value)} /></label>
+          <label>Classes left<input type="number" min={0} inputMode="numeric" value={left} onChange={(e) => setLeft(e.target.value)} /></label>
           {plan && (
             <p aria-live="polite">
               {plan.reachable

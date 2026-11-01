@@ -40,7 +40,7 @@ button.link { border: 0; background: none; padding: 4px 0; text-decoration: unde
 .row { display: flex; gap: 8px; flex-wrap: wrap; align-items: end; }
 details { margin: 12px 0 4px; }
 summary { cursor: pointer; font-weight: 600; }
-.whatif { margin-top: 8px; } .whatif input { width: 90px; } .whatif label { max-width: 170px; } .whatif p { margin: 0 0 8px; }
+.whatif { margin-top: 8px; } .whatif input { width: 90px; } .whatif p { margin: 0 0 8px; }
 .empty { text-align: center; }
 footer { margin-top: 24px; }
 .note { color: #4a5260; font-size: .85rem; }
