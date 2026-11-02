@@ -101,3 +101,31 @@ export function semesterPlan(attended: number, total: number, remaining: number,
   const maxSkips = Math.min(s, remaining);
   return { maxSkips, mustAttend: remaining - maxSkips, reachable: true, bestFinal };
 }
+
+export interface TodayVerdict {
+  id: string;
+  name: string;
+  canSkip: boolean;
+  /** Safe skips still left after skipping today (0 when canSkip is false). */
+  leftAfter: number;
+  /** Percentage if today's class is skipped. */
+  ifSkipped: number;
+}
+
+/**
+ * "Can I skip today?" for every subject that has a class today.
+ * Skipping is safe when the percentage after one more missed class is still at or above target.
+ */
+export function skipToday(subjects: Subject[], target: number): TodayVerdict[] {
+  return subjects.map((s) => {
+    const skips = safeSkips(s.attended, s.total, target);
+    const canSkip = skips >= 1;
+    return {
+      id: s.id,
+      name: s.name,
+      canSkip,
+      leftAfter: canSkip ? skips - 1 : 0,
+      ifSkipped: (s.attended / (s.total + 1)) * 100,
+    };
+  });
+}

@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from 'react';
 import {
   classesNeeded, isValidCounts, overall, percentage, projectPercentage,
   safeSkips, semesterPlan, status, summary, type Subject,
+  skipToday,
 } from './attendance';
 import { planText } from './share';
 import { isValidTarget, load, newId, parseState, save, type AppState } from './storage';
@@ -61,6 +62,8 @@ export default function App() {
   }
 
   const all = overall(subjects);
+  const [today, setToday] = useState<string[]>([]);
+  const verdicts = skipToday(subjects.filter((x) => today.includes(x.id)), target);
 
   return (
     <main>
@@ -69,6 +72,29 @@ export default function App() {
         <p className="tag">Know how many classes you can miss, and how many you need, before the 75% rule catches you.</p>
       </header>
 
+      {subjects.length > 0 && (
+        <section className="card today" aria-label="Can I skip today">
+          <h2>Can I skip today?</h2>
+          <p className="tag">Tick the classes you have today.</p>
+          <div className="row">
+            {subjects.map((x) => (
+              <label key={x.id}><input type="checkbox" checked={today.includes(x.id)}
+                onChange={(e) => setToday((t) => e.target.checked ? [...t, x.id] : t.filter((i) => i !== x.id))} /> {x.name}</label>
+            ))}
+          </div>
+          {verdicts.length > 0 && (
+            <ul aria-live="polite">
+              {verdicts.map((v) => (
+                <li key={v.id} className={v.canSkip ? 'safe' : 'short'}>
+                  <b>{v.name}</b>: {v.canSkip
+                    ? `skip is fine, you'd be at ${fmt(v.ifSkipped)} with ${v.leftAfter} safe ${v.leftAfter === 1 ? 'skip' : 'skips'} left.`
+                    : `go. skipping drops you to ${fmt(v.ifSkipped)}, below ${target}%.`}
+                </li>
+              ))}
+            </ul>
+          )}
+        </section>
+      )}
       <section className="card controls" aria-label="Settings">
         <label>
           Target attendance (%)
